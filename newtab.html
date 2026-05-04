@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat</title>
+        <style>
+            :root {
+                --bg: #111111;
+                --panel: #161616;
+                --panel-soft: #1c1c1c;
+                --border: #2a2a2a;
+                --text: #f1f1f1;
+                --muted: #a3a3a3;
+                --accent: #d4d4d4;
+                --accent-strong: #ffffff;
+                --user: #202020;
+                --assistant: #151515;
+                --danger: #ff8b8b;
+            }
+
+            body[data-theme="dark"] {
+                color-scheme: dark;
+            }
+
+            body[data-theme="light"] {
+                color-scheme: light;
+                --bg: #f5f5f5;
+                --panel: #ffffff;
+                --panel-soft: #f2f2f2;
+                --border: #d8d8d8;
+                --text: #1b1b1b;
+                --muted: #676767;
+                --accent: #3a3a3a;
+                --accent-strong: #000000;
+                --user: #ececec;
+                --assistant: #ffffff;
+                --danger: #c63838;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                margin: 0;
+                background: var(--bg);
+                color: var(--text);
+                font:
+                    15px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                    "Segoe UI", sans-serif;
+            }
+
+            button,
+            select,
+            textarea {
+                font: inherit;
+            }
+
+            .app {
+                min-height: 100vh;
+            }
+
+            .topbar {
+                position: fixed;
+                top: 14px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 20;
+                width: min(880px, calc(100vw - 28px));
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 14px 20px;
+                border: 1px solid var(--border);
+                background: rgba(22, 22, 22, 0.94);
+            }
+
+            .title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 0;
+            }
+
+            .title-mark {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--accent-strong);
+                flex: 0 0 auto;
+            }
+
+            .title-copy strong {
+                display: block;
+                font-size: 0.98rem;
+                font-weight: 600;
+            }
+
+            .title-copy span,
+            .status,
+            .meta,
+            .message-meta,
+            .empty,
+            .control-note {
+                color: var(--muted);
+            }
+
+            .title-copy span {
+                display: block;
+                font-size: 0.9rem;
+            }
+
+            .status {
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
+
+            .topbar-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .header-button {
+                min-height: 32px;
+                padding: 0 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                color: var(--text);
+                cursor: pointer;
+            }
+
+            .thread {
+                min-height: 100vh;
+                overflow: auto;
+                padding: 104px 20px 210px;
+            }
+
+            .thread-inner {
+                width: min(880px, 100%);
+                margin: 0 auto;
+                display: grid;
+                gap: 24px;
+            }
+
+            .message {
+                display: grid;
+                gap: 10px;
+            }
+
+            .message.user {
+                justify-items: end;
+            }
+
+            .message-meta {
+                font-size: 0.78rem;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .message-body {
+                width: min(100%, 820px);
+                border: 1px solid var(--border);
+                background: var(--assistant);
+                padding: 18px 20px;
+            }
+
+            .message.user .message-body {
+                width: min(100%, 720px);
+                background: var(--user);
+            }
+
+            .message-body p,
+            .message-body ul,
+            .message-body ol,
+            .message-body pre {
+                margin: 0 0 12px;
+            }
+
+            .message-body p:last-child,
+            .message-body ul:last-child,
+            .message-body ol:last-child,
+            .message-body pre:last-child {
+                margin-bottom: 0;
+            }
+
+            .message-body strong {
+                color: var(--accent-strong);
+            }
+
+            .message-body code {
+                padding: 0.12em 0.38em;
+                border-radius: 6px;
+                background: #222;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                font-size: 0.92em;
+            }
+
+            .message-body pre {
+                padding: 12px 14px;
+                overflow: auto;
+                border: 1px solid var(--border);
+                background: #101010;
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+
+            .message-body ul,
+            .message-body ol {
+                padding-left: 1.35em;
+            }
+
+            .assistant-stream {
+                display: grid;
+                gap: 14px;
+            }
+
+            .assistant-section {
+                border: 1px solid var(--border);
+                background: #191919;
+            }
+
+            body[data-theme="light"] .assistant-section,
+            body[data-theme="light"] .assistant-row,
+            body[data-theme="light"] .assistant-chip,
+            body[data-theme="light"] .assistant-callout,
+            body[data-theme="light"] .assistant-plan {
+                background: #f4f4f4;
+            }
+
+            .assistant-section summary {
+                list-style: none;
+                cursor: pointer;
+                padding: 10px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                color: var(--text);
+                font-size: 0.92rem;
+                font-weight: 600;
+            }
+
+            .assistant-section summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .assistant-section-body {
+                padding: 0 12px 12px;
+                display: grid;
+                gap: 10px;
+            }
+
+            .assistant-section-label {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .assistant-section-meta {
+                color: var(--muted);
+                font-size: 0.84rem;
+                font-weight: 500;
+            }
+
+            .assistant-paragraph {
+                margin: 0;
+                color: var(--text);
+            }
+
+            .assistant-row,
+            .assistant-chip,
+            .assistant-callout,
+            .assistant-plan {
+                border: 1px solid var(--border);
+                background: #191919;
+            }
+
+            .assistant-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 12px;
+                color: var(--muted);
+                font-size: 0.95rem;
+            }
+
+            .assistant-icon {
+                width: 18px;
+                text-align: center;
+                color: var(--accent-strong);
+                flex: 0 0 auto;
+            }
+
+            .assistant-label {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .assistant-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 10px 12px;
+                margin-right: 8px;
+                margin-bottom: 8px;
+                color: var(--text);
+                font-size: 0.92rem;
+            }
+
+            .assistant-callout {
+                padding: 12px 14px;
+            }
+
+            .assistant-callout-title {
+                margin: 0 0 10px;
+                color: var(--accent-strong);
+                font-size: 0.94rem;
+                font-weight: 600;
+            }
+
+            .assistant-callout-options {
+                display: grid;
+                gap: 8px;
+            }
+
+            .assistant-option {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--muted);
+                font-size: 0.92rem;
+            }
+
+            .assistant-option strong {
+                color: var(--text);
+                font-weight: 500;
+            }
+
+            .assistant-plan {
+                overflow: hidden;
+            }
+
+            .assistant-plan summary {
+                list-style: none;
+                cursor: pointer;
+                padding: 12px 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                color: var(--text);
+            }
+
+            .assistant-plan summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .assistant-plan-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-weight: 600;
+            }
+
+            .assistant-plan-status {
+                color: var(--muted);
+                font-size: 0.88rem;
+            }
+
+            .assistant-plan-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .assistant-plan-list li {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 14px;
+                border-top: 1px solid rgba(255, 255, 255, 0.03);
+                color: var(--muted);
+                font-size: 0.92rem;
+            }
+
+            body[data-theme="light"] .message-body code {
+                background: #e7e7e7;
+            }
+
+            body[data-theme="light"] .message-body pre {
+                background: #f0f0f0;
+            }
+
+            .assistant-plan-list li:first-child {
+                border-top: 0;
+            }
+
+            .assistant-plan-check {
+                color: #8dd49b;
+            }
+
+            .assistant-plan-open {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                min-height: 34px;
+                padding: 0 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                color: var(--text);
+                cursor: pointer;
+            }
+
+            .plan-popup {
+                position: fixed;
+                left: max(18px, calc(50% - 440px));
+                bottom: 132px;
+                z-index: 24;
+                width: min(420px, calc(100vw - 36px));
+                border: 1px solid var(--border);
+                background: rgba(24, 24, 24, 0.98);
+                box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+            }
+
+            body[data-theme="light"] .plan-popup {
+                background: rgba(255, 255, 255, 0.98);
+            }
+
+            .plan-popup[hidden] {
+                display: none;
+            }
+
+            .plan-popup-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .plan-popup-title {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 0;
+            }
+
+            .plan-popup-title strong {
+                display: block;
+                font-size: 0.95rem;
+            }
+
+            .plan-popup-title span,
+            .plan-popup-meta,
+            .plan-popup-empty {
+                color: var(--muted);
+                font-size: 0.86rem;
+            }
+
+            .plan-popup-actions {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+
+            .plan-popup-body {
+                padding: 12px 14px 14px;
+                display: grid;
+                gap: 12px;
+            }
+
+            .plan-popup-toolbar {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .plan-popup-button {
+                min-height: 32px;
+                padding: 0 10px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                color: var(--text);
+                cursor: pointer;
+            }
+
+            .plan-popup-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                display: grid;
+                gap: 8px;
+            }
+
+            .plan-popup-item {
+                display: grid;
+                grid-template-columns: auto auto 1fr;
+                gap: 10px;
+                align-items: center;
+                padding: 10px 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .plan-popup-probability {
+                min-width: 48px;
+                color: var(--text);
+                font-size: 0.84rem;
+                font-weight: 600;
+                text-align: right;
+            }
+
+            .plan-popup-check {
+                color: #8dd49b;
+                font-weight: 700;
+            }
+
+            .plan-popup-item.done .plan-popup-text {
+                color: var(--muted);
+                text-decoration: line-through;
+            }
+
+            .composer-wrap {
+                position: fixed;
+                left: 50%;
+                bottom: 14px;
+                transform: translateX(-50%);
+                z-index: 20;
+                width: min(880px, calc(100vw - 28px));
+            }
+
+            .composer {
+                width: 100%;
+            }
+
+            .control-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .control,
+            .control-submit {
+                min-height: 32px;
+                padding: 0 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                color: var(--text);
+            }
+
+            .control-button {
+                cursor: pointer;
+            }
+
+            .control-button.active {
+                border-color: #4a4a4a;
+                background: #262626;
+                color: var(--accent-strong);
+            }
+
+            .control-select {
+                cursor: pointer;
+            }
+
+            .control-submit {
+                cursor: pointer;
+                background: #232323;
+                font-weight: 600;
+            }
+
+            .input-shell {
+                border: 1px solid var(--border);
+                background: rgba(28, 28, 28, 0.96);
+                border-radius: 14px;
+                padding: 10px;
+            }
+
+            #composer-input {
+                width: 100%;
+                min-height: 92px;
+                resize: vertical;
+                border: 0;
+                outline: 0;
+                padding: 0;
+                background: transparent;
+                color: var(--text);
+                font: inherit;
+                line-height: 1.65;
+            }
+
+            #composer-input::placeholder {
+                color: #707070;
+            }
+
+            .composer-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-top: 10px;
+                font-size: 0.88rem;
+            }
+
+            .status.error {
+                color: var(--danger);
+            }
+
+            .empty {
+                padding: 32px 0 10px;
+                text-align: center;
+            }
+
+            @media (max-width: 720px) {
+                .topbar,
+                .thread,
+                .composer-wrap {
+                    padding-left: 14px;
+                    padding-right: 14px;
+                }
+
+                .topbar {
+                    top: 10px;
+                    width: calc(100vw - 20px);
+                }
+
+                .composer-wrap {
+                    bottom: 10px;
+                    width: calc(100vw - 20px);
+                }
+
+                .thread {
+                    padding-top: 98px;
+                    padding-bottom: 230px;
+                }
+
+                .composer-footer {
+                    align-items: flex-start;
+                    flex-direction: column;
+                }
+
+                .plan-popup {
+                    left: 10px;
+                    bottom: 150px;
+                    width: calc(100vw - 20px);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="app">
+            <header class="topbar">
+                <div class="title">
+                    <span class="title-mark" aria-hidden="true"></span>
+                    <div class="title-copy">
+                        <strong>Chat</strong>
+                        <span>Plain full-page workspace</span>
+                    </div>
+                </div>
+                <div class="topbar-actions">
+                    <button type="button" id="theme-toggle" class="header-button">Light</button>
+                    <div id="status-line" class="status">Ready.</div>
+                </div>
+            </header>
+
+            <section class="thread" id="thread">
+                <div class="thread-inner" id="thread-inner"></div>
+                <div class="empty" id="empty-state">Start typing to begin a new conversation.</div>
+            </section>
+
+            <section class="composer-wrap">
+                <div class="composer">
+                    <div class="input-shell">
+                        <div class="control-row" aria-label="Chat controls">
+                            <button type="button" id="plus-button" class="control control-button">+</button>
+
+                            <select id="target-select" class="control control-select" aria-label="Target">
+                                <option value="current file">target: current file</option>
+                                <option value="workspace">target: workspace</option>
+                                <option value="selection">target: selection</option>
+                                <option value="browser">target: browser</option>
+                            </select>
+
+                            <select id="agent-select" class="control control-select" aria-label="Agent">
+                                <option value="ask">agent: ask</option>
+                                <option value="edit">agent: edit</option>
+                                <option value="plan">agent: plan</option>
+                                <option value="code">agent: code</option>
+                            </select>
+
+                            <select id="model-select" class="control control-select" aria-label="Model">
+                                <option value="gpt-5.4">model: gpt-5.4</option>
+                                <option value="gpt-5-mini">model: gpt-5-mini</option>
+                                <option value="claude-sonnet">model: claude-sonnet</option>
+                                <option value="local">model: local</option>
+                            </select>
+
+                            <select id="effort-select" class="control control-select" aria-label="Medium">
+                                <option value="medium">medium</option>
+                                <option value="low">low</option>
+                                <option value="high">high</option>
+                            </select>
+
+                            <button type="button" id="web-toggle" class="control control-button">off</button>
+
+                            <button type="button" id="submit-button" class="control-submit">submit</button>
+                        </div>
+
+                        <textarea
+                            id="composer-input"
+                            spellcheck="false"
+                            placeholder="Ask for a change, a plan, a rewrite, or a direct answer..."
+                            aria-label="Chat input"
+                        ></textarea>
+
+                        <div class="composer-footer">
+                            <div class="control-note">Enter submits. Shift+Enter adds a new line. Messages stay saved locally.</div>
+                            <div id="meta-line" class="meta">target current file · agent ask · model gpt-5.4 · medium · off</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside id="plan-popup" class="plan-popup" hidden>
+                <div class="plan-popup-header">
+                    <div class="plan-popup-title">
+                        <span>⌄</span>
+                        <div>
+                            <strong>Plan</strong>
+                            <span id="plan-popup-meta">No active plan</span>
+                        </div>
+                    </div>
+                    <div class="plan-popup-actions">
+                        <button type="button" id="plan-popup-close" class="plan-popup-button">Close</button>
+                    </div>
+                </div>
+                <div class="plan-popup-body">
+                    <div class="plan-popup-toolbar">
+                        <button type="button" id="plan-add" class="plan-popup-button">Add</button>
+                        <button type="button" id="plan-refactor" class="plan-popup-button">Refactor</button>
+                        <button type="button" id="plan-steer" class="plan-popup-button">Steer</button>
+                    </div>
+                    <div id="plan-popup-empty" class="plan-popup-empty">No plan yet. Send a prompt to generate one.</div>
+                    <ul id="plan-popup-list" class="plan-popup-list"></ul>
+                </div>
+            </aside>
+        </main>
+
+        <script>
+            (function () {
+                var STORAGE_KEY = "ladybird-newtab-chat-v1";
+                var MAX_MESSAGES = 80;
+
+                var threadInner = document.getElementById("thread-inner");
+                var emptyState = document.getElementById("empty-state");
+                var thread = document.getElementById("thread");
+                var input = document.getElementById("composer-input");
+                var statusLine = document.getElementById("status-line");
+                var metaLine = document.getElementById("meta-line");
+                var themeToggle = document.getElementById("theme-toggle");
+                var submitButton = document.getElementById("submit-button");
+                var plusButton = document.getElementById("plus-button");
+                var webToggle = document.getElementById("web-toggle");
+                var targetSelect = document.getElementById("target-select");
+                var agentSelect = document.getElementById("agent-select");
+                var modelSelect = document.getElementById("model-select");
+                var effortSelect = document.getElementById("effort-select");
+                var THEME_KEY = "ladybird-newtab-chat-theme";
+                var planPopup = document.getElementById("plan-popup");
+                var planPopupList = document.getElementById("plan-popup-list");
+                var planPopupMeta = document.getElementById("plan-popup-meta");
+                var planPopupEmpty = document.getElementById("plan-popup-empty");
+                var planAddButton = document.getElementById("plan-add");
+                var planRefactorButton = document.getElementById("plan-refactor");
+                var planSteerButton = document.getElementById("plan-steer");
+                var planPopupClose = document.getElementById("plan-popup-close");
+
+                function normalizeState(raw) {
+                    var fallback = defaultState();
+                    if (!raw || typeof raw !== "object") return fallback;
+
+                    return {
+                        settings: raw.settings && typeof raw.settings === "object" ? raw.settings : fallback.settings,
+                        messages: Array.isArray(raw.messages) ? raw.messages : fallback.messages,
+                        planPopup:
+                            raw.planPopup && typeof raw.planPopup === "object"
+                                ? {
+                                      open: !!raw.planPopup.open,
+                                      trajectory: raw.planPopup.trajectory || "direct",
+                                      items: Array.isArray(raw.planPopup.items) ? raw.planPopup.items : [],
+                                  }
+                                : { open: false, trajectory: "direct", items: [] },
+                    };
+                }
+
+                function escapeHtml(text) {
+                    return String(text)
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;");
+                }
+
+                function renderMarkdown(text) {
+                    var html = escapeHtml(text);
+
+                    html = html.replace(/^### (.*)$/gm, "<strong>$1</strong>");
+                    html = html.replace(/^## (.*)$/gm, "<strong>$1</strong>");
+                    html = html.replace(/^# (.*)$/gm, "<strong>$1</strong>");
+                    html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+                    html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+                    var lines = html.split(/\n/);
+                    var out = [];
+                    var inUl = false;
+
+                    function closeUl() {
+                        if (inUl) {
+                            out.push("</ul>");
+                            inUl = false;
+                        }
+                    }
+
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i];
+                        var ul = /^- (.+)$/.exec(line);
+                        if (ul) {
+                            if (!inUl) {
+                                out.push("<ul>");
+                                inUl = true;
+                            }
+                            out.push("<li>" + ul[1] + "</li>");
+                            continue;
+                        }
+
+                        closeUl();
+                        if (!line) out.push("");
+                        else out.push("<p>" + line + "</p>");
+                    }
+
+                    closeUl();
+                    return out.join("");
+                }
+
+                function loadState() {
+                    try {
+                        var raw = localStorage.getItem(STORAGE_KEY);
+                        if (!raw) return null;
+                        var parsed = JSON.parse(raw);
+                        return normalizeState(parsed);
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                function saveState() {
+                    try {
+                        localStorage.setItem(
+                            STORAGE_KEY,
+                            JSON.stringify({
+                                messages: state.messages,
+                                settings: state.settings,
+                                planPopup: state.planPopup,
+                            })
+                        );
+                    } catch (e) {}
+                }
+
+                function defaultState() {
+                    return {
+                        settings: {
+                            target: "current file",
+                            agent: "ask",
+                            model: "gpt-5.4",
+                            medium: "medium",
+                            web: false,
+                        },
+                        messages: [
+                            {
+                                role: "assistant",
+                                response: {
+                                    kind: "zed",
+                                    intro: [
+                                        "I am ready.",
+                                        "Use the controls below to set target, agent, model, medium, and whether external access stays off.",
+                                    ],
+                                    rows: [
+                                        { type: "thinking", label: "Thinking" },
+                                        { type: "tool", label: "Waiting for your first prompt" },
+                                    ],
+                                    summary: "Then send a prompt and I will answer in the same compact response flow used here.",
+                                    chips: [],
+                                    plan: [],
+                                },
+                            },
+                        ],
+                        planPopup: {
+                            open: false,
+                            trajectory: "direct",
+                            items: [],
+                        },
+                    };
+                }
+
+                var state = loadState() || defaultState();
+                var theme = localStorage.getItem(THEME_KEY) || "dark";
+
+                function applyTheme() {
+                    document.body.setAttribute("data-theme", theme);
+                    if (themeToggle) themeToggle.textContent = theme === "dark" ? "Light" : "Dark";
+                }
+
+                function syncControlsFromState() {
+                    targetSelect.value = state.settings.target;
+                    agentSelect.value = state.settings.agent;
+                    modelSelect.value = state.settings.model;
+                    effortSelect.value = state.settings.medium;
+                    webToggle.textContent = state.settings.web ? "on" : "off";
+                    webToggle.className = "control control-button" + (state.settings.web ? " active" : "");
+                    metaLine.textContent =
+                        "target " +
+                        state.settings.target +
+                        " · agent " +
+                        state.settings.agent +
+                        " · model " +
+                        state.settings.model +
+                        " · " +
+                        state.settings.medium +
+                        " · " +
+                        (state.settings.web ? "on" : "off");
+                }
+
+                function setStatus(text, isError) {
+                    statusLine.textContent = text;
+                    statusLine.className = "status" + (isError ? " error" : "");
+                }
+
+                function summarizePrompt(prompt) {
+                    var cleaned = String(prompt || "").replace(/\s+/g, " ").trim();
+                    if (cleaned.length <= 180) return cleaned;
+                    return cleaned.slice(0, 177) + "...";
+                }
+
+                function promptBullets(prompt) {
+                    var parts = String(prompt || "")
+                        .split(/\n+/)
+                        .map(function (line) {
+                            return line.replace(/^\s*[-*]\s*/, "").trim();
+                        })
+                        .filter(function (line) {
+                            return line.length > 0;
+                        });
+
+                    if (!parts.length) return ["Clarify the desired outcome.", "Name the exact file or surface to change.", "Describe the constraint or expected result."];
+
+                    var bullets = [];
+                    for (var i = 0; i < parts.length && bullets.length < 3; i++) bullets.push(parts[i]);
+                    while (bullets.length < 3) bullets.push("Refine the request with one more concrete detail.");
+                    return bullets;
+                }
+
+                function buildAssistantReply(prompt) {
+                    var bullets = promptBullets(prompt);
+                    var rows = [
+                        { type: "thinking", label: "Thinking" },
+                        { type: "todo", label: "Start " + state.settings.agent + " task" },
+                        { type: "tool", label: "Inspect " + state.settings.target },
+                    ];
+                    var chips = [];
+
+                    if (state.settings.agent === "edit" || state.settings.agent === "code") {
+                        chips.push("Update file");
+                        rows.push({ type: "tool", label: "Prepare file change" });
+                    }
+
+                    if (state.settings.web) {
+                        rows.push({ type: "tool", label: "Check external references" });
+                    }
+
+                    rows.push({ type: "todo", label: "Complete " + state.settings.agent + " task" });
+
+                    return {
+                        kind: "zed",
+                        intro: [
+                            "I can work with that.",
+                            "I am reading this as " + summarizePrompt(prompt) + ".",
+                        ],
+                        rows: rows,
+                        summary:
+                            state.settings.agent === "plan"
+                                ? "I will keep the output structured and turn this into a compact execution plan."
+                                : state.settings.agent === "edit" || state.settings.agent === "code"
+                                  ? "I will bias toward direct changes, keep the layout plain, and show progress as compact actions."
+                                  : "I will answer directly and keep the response concise, readable, and implementation-oriented.",
+                        chips: chips,
+                        callout:
+                            state.settings.web
+                                ? {
+                                      title: "External access enabled",
+                                      options: [
+                                          { icon: "✓", label: "Use live references", shortcut: "enabled" },
+                                          { icon: "•", label: "Target", shortcut: state.settings.target },
+                                          { icon: "•", label: "Model", shortcut: state.settings.model },
+                                      ],
+                                  }
+                                : {
+                                      title: "Working context",
+                                      options: [
+                                          { icon: "•", label: "Target", shortcut: state.settings.target },
+                                          { icon: "•", label: "Agent", shortcut: state.settings.agent },
+                                          { icon: "•", label: "Mode", shortcut: state.settings.medium + " · web off" },
+                                      ],
+                                  },
+                        plan: [
+                            { done: true, text: bullets[0], probability: 84 },
+                            { done: true, text: bullets[1], probability: 76 },
+                            { done: true, text: bullets[2], probability: 68 },
+                        ],
+                    };
+                }
+
+                function setCurrentPlanFromResponse(response) {
+                    var items = [];
+                    var source = response && response.plan ? response.plan : [];
+                    for (var i = 0; i < source.length; i++) {
+                        items.push({
+                            done: !!source[i].done,
+                            text: source[i].text,
+                            probability: typeof source[i].probability === "number" ? source[i].probability : 70,
+                        });
+                    }
+                    state.planPopup.items = items;
+                    state.planPopup.open = true;
+                    if (!state.planPopup.trajectory) state.planPopup.trajectory = "direct";
+                }
+
+                function trajectoryLabel() {
+                    return state.planPopup.trajectory || "direct";
+                }
+
+                function renderPlanPopup() {
+                    if (!planPopup || !planPopupList || !planPopupMeta || !planPopupEmpty) return;
+
+                    var items = state.planPopup.items || [];
+                    planPopupList.textContent = "";
+                    planPopup.hidden = !state.planPopup.open;
+                    planPopupMeta.textContent =
+                        items.length +
+                        (items.length === 1 ? " step" : " steps") +
+                        " · " +
+                        trajectoryLabel();
+
+                    planPopupEmpty.hidden = items.length > 0;
+
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        var li = document.createElement("li");
+                        li.className = "plan-popup-item" + (item.done ? " done" : "");
+
+                        var probability = document.createElement("span");
+                        probability.className = "plan-popup-probability";
+                        probability.textContent = String(item.probability || 0) + "%";
+
+                        var check = document.createElement("span");
+                        check.className = "plan-popup-check";
+                        check.textContent = item.done ? "✓" : "•";
+
+                        var text = document.createElement("span");
+                        text.className = "plan-popup-text";
+                        text.textContent = item.text;
+
+                        li.appendChild(probability);
+                        li.appendChild(check);
+                        li.appendChild(text);
+                        planPopupList.appendChild(li);
+                    }
+                }
+
+                function renderSection(title, meta, contentHtml, open) {
+                    return (
+                        '<details class="assistant-section"' +
+                        (open ? " open" : "") +
+                        '><summary><span class="assistant-section-label"><span>⌄</span><span>' +
+                        escapeHtml(title) +
+                        '</span></span><span class="assistant-section-meta">' +
+                        escapeHtml(meta || "") +
+                        '</span></summary><div class="assistant-section-body">' +
+                        contentHtml +
+                        "</div></details>"
+                    );
+                }
+
+                function renderAssistantStructured(response) {
+                    var parts = ['<div class="assistant-stream">'];
+
+                    var intro = response.intro || [];
+                    if (intro.length) {
+                        var introHtml = [];
+                        for (var i = 0; i < intro.length; i++) {
+                            introHtml.push('<p class="assistant-paragraph">' + escapeHtml(intro[i]) + "</p>");
+                        }
+                        parts.push(renderSection("Response", "open", introHtml.join(""), true));
+                    }
+
+                    var rows = response.rows || [];
+                    if (rows.length) {
+                        var rowHtml = [];
+                        for (var j = 0; j < rows.length; j++) {
+                            var row = rows[j];
+                            var icon = row.type === "thinking" ? "◦" : row.type === "tool" ? "↗" : "✓";
+                            rowHtml.push(
+                                '<div class="assistant-row"><span class="assistant-icon">' +
+                                    icon +
+                                    '</span><span class="assistant-label">' +
+                                    escapeHtml(row.label) +
+                                    "</span></div>"
+                            );
+                        }
+                        parts.push(renderSection("Activity", rows.length + " items", rowHtml.join(""), true));
+                    }
+
+                    var chips = response.chips || [];
+                    if (chips.length) {
+                        var chipHtml = [];
+                        for (var c = 0; c < chips.length; c++) {
+                            chipHtml.push('<span class="assistant-chip">⌘ ' + escapeHtml(chips[c]) + "</span>");
+                        }
+                        parts.push(renderSection("Actions", chips.length + " available", chipHtml.join(""), false));
+                    }
+
+                    if (response.summary) {
+                        parts.push(
+                            renderSection(
+                                "Summary",
+                                "concise",
+                                '<p class="assistant-paragraph">' + escapeHtml(response.summary) + "</p>",
+                                true
+                            )
+                        );
+                    }
+
+                    if (response.callout) {
+                        var calloutHtml = ['<div class="assistant-callout"><p class="assistant-callout-title">' + escapeHtml(response.callout.title) + '</p><div class="assistant-callout-options">'];
+                        var options = response.callout.options || [];
+                        for (var o = 0; o < options.length; o++) {
+                            calloutHtml.push(
+                                '<div class="assistant-option"><span>' +
+                                    escapeHtml(options[o].icon || "•") +
+                                    '</span><strong>' +
+                                    escapeHtml(options[o].label) +
+                                    "</strong><span>" +
+                                    escapeHtml(options[o].shortcut || "") +
+                                    "</span></div>"
+                            );
+                        }
+                        calloutHtml.push("</div></div>");
+                        parts.push(renderSection("Context", "details", calloutHtml.join(""), false));
+                    }
+
+                    var plan = response.plan || [];
+                    if (plan.length) {
+                        parts.push(
+                            '<details class="assistant-plan" open><summary><span class="assistant-plan-title"><span>⌄</span><span>Plan</span></span><span class="assistant-plan-status">All Done</span></summary><div class="assistant-section-body"><button type="button" class="assistant-plan-open" data-open-plan="true">Open plan popup</button><ul class="assistant-plan-list">'
+                        );
+                        for (var p = 0; p < plan.length; p++) {
+                            parts.push(
+                                '<li><span class="plan-popup-probability">' +
+                                    escapeHtml(String(plan[p].probability || 0) + "%") +
+                                    '</span><span class="assistant-plan-check">' +
+                                    (plan[p].done ? "✓" : "•") +
+                                    "</span><span>" +
+                                    escapeHtml(plan[p].text) +
+                                    "</span></li>"
+                            );
+                        }
+                        parts.push("</ul></div></details>");
+                    }
+
+                    parts.push("</div>");
+                    return parts.join("");
+                }
+
+                function renderMessages() {
+                    threadInner.textContent = "";
+
+                    for (var i = 0; i < state.messages.length; i++) {
+                        var message = state.messages[i];
+                        var article = document.createElement("article");
+                        article.className = "message " + message.role;
+
+                        var meta = document.createElement("div");
+                        meta.className = "message-meta";
+                        meta.textContent = message.role === "assistant" ? "assistant" : "you";
+
+                        var body = document.createElement("div");
+                        body.className = "message-body";
+
+                        if (message.role === "assistant") {
+                            if (message.response && message.response.kind === "zed") body.innerHTML = renderAssistantStructured(message.response);
+                            else body.innerHTML = renderMarkdown(message.content || "");
+                        } else {
+                            var p = document.createElement("p");
+                            p.textContent = message.content;
+                            body.appendChild(p);
+                        }
+
+                        article.appendChild(meta);
+                        article.appendChild(body);
+                        threadInner.appendChild(article);
+                    }
+
+                    var openPlanButtons = threadInner.querySelectorAll("[data-open-plan='true']");
+                    for (var b = 0; b < openPlanButtons.length; b++) {
+                        openPlanButtons[b].addEventListener("click", function () {
+                            state.planPopup.open = true;
+                            saveState();
+                            renderPlanPopup();
+                        });
+                    }
+
+                    emptyState.hidden = state.messages.length > 0;
+                    window.setTimeout(function () {
+                        thread.scrollTop = thread.scrollHeight;
+                    }, 0);
+                }
+
+                function submitPrompt() {
+                    var prompt = input.value.replace(/\s+$/, "");
+                    if (!prompt) {
+                        setStatus("Write a prompt before you submit.", true);
+                        return;
+                    }
+
+                    state.messages.push({ role: "user", content: prompt });
+                    var response = buildAssistantReply(prompt);
+                    state.messages.push({ role: "assistant", response: response });
+                    setCurrentPlanFromResponse(response);
+
+                    if (state.messages.length > MAX_MESSAGES) {
+                        state.messages = state.messages.slice(state.messages.length - MAX_MESSAGES);
+                    }
+
+                    saveState();
+                    renderMessages();
+                    input.value = "";
+                    setStatus("Sent.");
+                    input.focus();
+                }
+
+                plusButton.addEventListener("click", function () {
+                    var prefix = "Context:\n- ";
+                    var value = input.value;
+                    if (!value) input.value = prefix;
+                    else if (value.indexOf(prefix) !== 0) input.value = prefix + value;
+                    input.focus();
+                    setStatus("Added a context block.");
+                });
+
+                targetSelect.addEventListener("change", function () {
+                    state.settings.target = targetSelect.value;
+                    saveState();
+                    syncControlsFromState();
+                });
+
+                agentSelect.addEventListener("change", function () {
+                    state.settings.agent = agentSelect.value;
+                    saveState();
+                    syncControlsFromState();
+                });
+
+                modelSelect.addEventListener("change", function () {
+                    state.settings.model = modelSelect.value;
+                    saveState();
+                    syncControlsFromState();
+                });
+
+                effortSelect.addEventListener("change", function () {
+                    state.settings.medium = effortSelect.value;
+                    saveState();
+                    syncControlsFromState();
+                });
+
+                webToggle.addEventListener("click", function () {
+                    state.settings.web = !state.settings.web;
+                    saveState();
+                    syncControlsFromState();
+                });
+
+                submitButton.addEventListener("click", submitPrompt);
+
+                input.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        submitPrompt();
+                    }
+                });
+
+                document.addEventListener("keydown", function (event) {
+                    if (event.key === "/" && document.activeElement !== input) {
+                        event.preventDefault();
+                        input.focus();
+                    }
+                });
+
+                if (themeToggle) {
+                    themeToggle.addEventListener("click", function () {
+                        theme = theme === "dark" ? "light" : "dark";
+                        localStorage.setItem(THEME_KEY, theme);
+                        applyTheme();
+                    });
+                }
+
+                if (planPopupClose) {
+                    planPopupClose.addEventListener("click", function () {
+                        state.planPopup.open = false;
+                        saveState();
+                        renderPlanPopup();
+                    });
+                }
+
+                if (planAddButton) {
+                    planAddButton.addEventListener("click", function () {
+                        var text = window.prompt("Add plan step");
+                        if (!text) return;
+                        state.planPopup.items.push({
+                            done: false,
+                            text: String(text).trim(),
+                            probability: 58,
+                        });
+                        state.planPopup.open = true;
+                        saveState();
+                        renderPlanPopup();
+                    });
+                }
+
+                if (planRefactorButton) {
+                    planRefactorButton.addEventListener("click", function () {
+                        var items = state.planPopup.items || [];
+                        for (var i = 0; i < items.length; i++) {
+                            items[i].text = "Refined: " + items[i].text.replace(/^Refined:\s*/, "");
+                            items[i].probability = Math.min(99, (items[i].probability || 60) + 6);
+                        }
+                        state.planPopup.open = true;
+                        saveState();
+                        renderPlanPopup();
+                        setStatus("Plan refactored.");
+                    });
+                }
+
+                if (planSteerButton) {
+                    planSteerButton.addEventListener("click", function () {
+                        var next =
+                            state.planPopup.trajectory === "direct"
+                                ? "exploratory"
+                                : state.planPopup.trajectory === "exploratory"
+                                  ? "recovery"
+                                  : "direct";
+                        state.planPopup.trajectory = next;
+                        var delta = next === "direct" ? 5 : next === "exploratory" ? -3 : 2;
+                        var items = state.planPopup.items || [];
+                        for (var i = 0; i < items.length; i++) {
+                            var current = typeof items[i].probability === "number" ? items[i].probability : 60;
+                            items[i].probability = Math.max(5, Math.min(99, current + delta));
+                        }
+                        state.planPopup.open = true;
+                        saveState();
+                        renderPlanPopup();
+                        setStatus("Trajectory set to " + next + ".");
+                    });
+                }
+
+                applyTheme();
+                syncControlsFromState();
+                renderMessages();
+                renderPlanPopup();
+                input.focus();
+            })();
+        </script>
+    </body>
+</html>
