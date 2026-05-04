@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="dark light" />
+        <title>Ladybird Build Workspace</title>
+        <style>
+            :root {
+                color-scheme: dark light;
+                --bg: #0a0f18;
+                --panel: #0f1724;
+                --panel-soft: #121c2b;
+                --panel-header: #101826;
+                --border: rgba(148, 163, 184, 0.16);
+                --text: #e5edf7;
+                --muted: #90a0b7;
+                --subtle: #62738c;
+                --accent: #4f8cff;
+                --accent-soft: rgba(79, 140, 255, 0.12);
+                --success: #22c55e;
+                --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+            }
+
+            @media (prefers-color-scheme: light) {
+                :root {
+                    --bg: #eef3f9;
+                    --panel: #ffffff;
+                    --panel-soft: #f8fafc;
+                    --panel-header: #f7f9fc;
+                    --border: rgba(15, 23, 42, 0.1);
+                    --text: #111827;
+                    --muted: #526074;
+                    --subtle: #718096;
+                    --accent: #2563eb;
+                    --accent-soft: rgba(37, 99, 235, 0.09);
+                    --success: #16a34a;
+                    --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+                }
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                margin: 0;
+                min-height: 100%;
+            }
+
+            body {
+                padding: 8px;
+                font-family:
+                    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    sans-serif;
+                color: var(--text);
+                background:
+                    radial-gradient(circle at top left, rgba(79, 140, 255, 0.12), transparent 28%),
+                    var(--bg);
+            }
+
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            .app {
+                min-height: calc(100vh - 16px);
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 12px 14px;
+                border: 1px solid var(--border);
+                background: var(--panel);
+                box-shadow: var(--shadow);
+            }
+
+            .header-title {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 0;
+            }
+
+            .logo {
+                width: 12px;
+                height: 12px;
+                flex: 0 0 auto;
+                border-radius: 3px;
+                background: linear-gradient(135deg, var(--accent), #7c3aed);
+            }
+
+            .header-title strong {
+                display: block;
+                font-size: 1rem;
+                font-weight: 700;
+            }
+
+            .header-title span,
+            .status,
+            .panel-copy,
+            .hint,
+            .muted,
+            .tree-item small,
+            .log-line,
+            .message p,
+            .prompt-card span {
+                color: var(--muted);
+            }
+
+            .header-actions {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .chip,
+            .button,
+            .tab {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                height: 34px;
+                padding: 0 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                font-size: 0.92rem;
+            }
+
+            .chip::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 999px;
+                background: var(--success);
+                box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+            }
+
+            .button.primary {
+                background: linear-gradient(135deg, var(--accent), #7c3aed);
+                color: #fff;
+                border-color: transparent;
+            }
+
+            .mobile-tabs {
+                display: none;
+                gap: 8px;
+                overflow-x: auto;
+                padding: 0 2px;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+                    "Courier New", monospace;
+            }
+
+            .workspace {
+                flex: 1;
+                min-height: 0;
+                display: grid;
+                grid-template-columns: minmax(320px, 1fr) minmax(420px, 1fr);
+                gap: 8px;
+            }
+
+            .right-stack {
+                min-height: 0;
+                display: grid;
+                grid-template-rows: minmax(220px, 1.1fr) minmax(180px, 0.9fr) minmax(160px, 0.8fr);
+                gap: 8px;
+            }
+
+            .panel {
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                border: 1px solid var(--border);
+                background: var(--panel);
+                box-shadow: var(--shadow);
+            }
+
+            .panel-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 8px 10px;
+                border-bottom: 1px solid var(--border);
+                background: var(--panel-header);
+                font-size: 0.84rem;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+                    "Courier New", monospace;
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+            }
+
+            .panel-body {
+                min-height: 0;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .chat-body {
+                padding: 14px;
+                gap: 14px;
+            }
+
+            .intro {
+                padding: 14px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .intro h1 {
+                margin: 0 0 8px;
+                font-size: 1.4rem;
+                letter-spacing: -0.03em;
+            }
+
+            .intro p {
+                margin: 0;
+                line-height: 1.6;
+                color: var(--muted);
+            }
+
+            .messages {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .message {
+                padding: 14px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .message header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                margin-bottom: 8px;
+                font-size: 0.84rem;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+                    "Courier New", monospace;
+                text-transform: uppercase;
+            }
+
+            .message p {
+                margin: 0;
+                line-height: 1.65;
+            }
+
+            .prompt-grid {
+                display: grid;
+                gap: 10px;
+            }
+
+            .prompt-card {
+                padding: 12px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .prompt-card strong {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 0.94rem;
+            }
+
+            .composer {
+                margin-top: auto;
+                display: flex;
+                gap: 8px;
+                padding-top: 6px;
+            }
+
+            .composer-input {
+                flex: 1;
+                height: 44px;
+                padding: 0 14px;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+                color: var(--text);
+                font: inherit;
+            }
+
+            .preview-toolbar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .toolbar-actions {
+                display: flex;
+                gap: 4px;
+                color: var(--subtle);
+                flex: 0 0 auto;
+            }
+
+            .toolbar-icon {
+                width: 24px;
+                height: 24px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .address {
+                flex: 1;
+                min-width: 0;
+                height: 28px;
+                padding: 0 10px;
+                border: 1px solid var(--border);
+                background: #fff;
+                color: #111827;
+                font: inherit;
+                font-size: 0.76rem;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                .address {
+                    background: #0b1220;
+                    color: #dbe7f5;
+                }
+            }
+
+            .preview-frame {
+                flex: 1;
+                padding: 14px;
+                background:
+                    linear-gradient(180deg, rgba(79, 140, 255, 0.08), transparent 45%),
+                    var(--panel-soft);
+            }
+
+            .preview-window {
+                height: 100%;
+                border: 1px solid var(--border);
+                background: var(--panel);
+                overflow: hidden;
+            }
+
+            .window-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 10px 12px;
+                border-bottom: 1px solid var(--border);
+                background: var(--panel-header);
+                font-size: 0.8rem;
+            }
+
+            .window-dots {
+                display: flex;
+                gap: 6px;
+            }
+
+            .window-dots span {
+                width: 8px;
+                height: 8px;
+                border-radius: 999px;
+                background: rgba(148, 163, 184, 0.5);
+            }
+
+            .window-content {
+                display: grid;
+                gap: 12px;
+                padding: 14px;
+            }
+
+            .hero-card,
+            .metric,
+            .tree,
+            .file-content,
+            .logs {
+                border: 1px solid var(--border);
+                background: var(--panel-soft);
+            }
+
+            .hero-card {
+                padding: 16px;
+            }
+
+            .hero-card strong {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 1.05rem;
+            }
+
+            .metrics {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .metric {
+                padding: 12px;
+            }
+
+            .metric strong,
+            .tree-item strong {
+                display: block;
+                margin-bottom: 4px;
+            }
+
+            .filesystem {
+                display: grid;
+                grid-template-columns: 32% 68%;
+                min-height: 0;
+                flex: 1;
+            }
+
+            .tree,
+            .file-content,
+            .logs {
+                min-height: 0;
+                overflow: auto;
+            }
+
+            .tree {
+                border-right: 1px solid var(--border);
+            }
+
+            .tree-item {
+                padding: 9px 10px;
+                border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+            }
+
+            .tree-item.active {
+                background: var(--accent-soft);
+            }
+
+            .tree-item.indent-1 {
+                padding-left: 24px;
+            }
+
+            .tree-item.indent-2 {
+                padding-left: 38px;
+            }
+
+            .file-content {
+                padding: 10px 12px;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+                    "Courier New", monospace;
+                font-size: 0.83rem;
+                line-height: 1.55;
+                white-space: pre-wrap;
+            }
+
+            .logs {
+                padding: 10px 12px;
+                font-family:
+                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+                    "Courier New", monospace;
+                font-size: 0.82rem;
+                line-height: 1.55;
+                white-space: pre-wrap;
+            }
+
+            .log-line + .log-line {
+                margin-top: 10px;
+            }
+
+            @media (max-width: 960px) {
+                .mobile-tabs {
+                    display: flex;
+                }
+
+                .workspace {
+                    grid-template-columns: 1fr;
+                }
+
+                .right-stack {
+                    grid-template-rows: repeat(3, minmax(220px, auto));
+                }
+
+                .header {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+
+                .header-actions {
+                    justify-content: flex-start;
+                }
+            }
+
+            @media (max-width: 640px) {
+                body {
+                    padding: 6px;
+                }
+
+                .app {
+                    min-height: calc(100vh - 12px);
+                }
+
+                .metrics,
+                .filesystem {
+                    grid-template-columns: 1fr;
+                }
+
+                .tree {
+                    border-right: 0;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .chip,
+                .button,
+                .tab {
+                    white-space: nowrap;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="app">
+            <header class="header">
+                <div class="header-title">
+                    <span class="logo" aria-hidden="true"></span>
+                    <div>
+                        <strong>Ladybird Build Workspace</strong>
+                        <span>Local-model app shell aligned to the Vibe Coding Platform layout.</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <span class="chip">ready</span>
+                    <span class="status">offline runtime</span>
+                    <a class="button primary" href="about:newtab">Preview</a>
+                    <a class="button" href="about:settings">Settings</a>
+                    <a class="button" href="about:processes">Processes</a>
+                </div>
+            </header>
+
+            <nav class="mobile-tabs" aria-label="Sections">
+                <span class="tab">Chat</span>
+                <span class="tab">Preview</span>
+                <span class="tab">File Explorer</span>
+                <span class="tab">Logs</span>
+            </nav>
+
+            <section class="workspace">
+                <article class="panel">
+                    <header class="panel-header">
+                        <span>Chat</span>
+                        <span class="muted">agent ready</span>
+                    </header>
+                    <div class="panel-body chat-body">
+                        <section class="intro">
+                            <h1>Build against local models without leaving Ladybird.</h1>
+                            <p>
+                                This page now mirrors the example app's working layout: a dedicated chat
+                                panel on the left and build surfaces on the right, adapted for offline
+                                inference and built-in <code>about:</code> tools.
+                            </p>
+                        </section>
+
+                        <div class="messages">
+                            <article class="message">
+                                <header>
+                                    <span>User</span>
+                                    <span class="muted">prompt</span>
+                                </header>
+                                <p>Create a build workspace that feels like the OSS Vibe Coding Platform, but targets local inference instead of hosted services.</p>
+                            </article>
+
+                            <article class="message">
+                                <header>
+                                    <span>Assistant</span>
+                                    <span class="muted">stream complete</span>
+                                </header>
+                                <p>
+                                    Workspace updated. The browser now presents Chat, Preview, File
+                                    Explorer, and Logs in the same desktop flow as the reference app,
+                                    while wiring actions to Ladybird pages like <code>about:newtab</code>,
+                                    <code>about:settings</code>, and <code>about:processes</code>.
+                                </p>
+                            </article>
+                        </div>
+
+                        <div class="prompt-grid">
+                            <div class="prompt-card">
+                                <strong>Generate a local markdown chat</strong>
+                                <span>Prototype a streaming UI backed by Ollama or llama.cpp on this machine.</span>
+                            </div>
+                            <div class="prompt-card">
+                                <strong>Create a tiny preview target</strong>
+                                <span>Render a local app in <code>about:newtab</code> and iterate without cloud services.</span>
+                            </div>
+                            <div class="prompt-card">
+                                <strong>Trace browser load under heavy output</strong>
+                                <span>Use logs and processes together when long responses stress the renderer.</span>
+                            </div>
+                        </div>
+
+                        <div class="composer">
+                            <input class="composer-input" value="Describe the local app you want to build..." aria-label="Prompt input" />
+                            <a class="button primary" href="about:newtab">Run</a>
+                        </div>
+                    </div>
+                </article>
+
+                <div class="right-stack">
+                    <article class="panel">
+                        <header class="panel-header">
+                            <div class="preview-toolbar">
+                                <div class="toolbar-actions">
+                                    <a class="toolbar-icon" href="about:newtab" aria-label="Open preview">↗</a>
+                                    <a class="toolbar-icon" href="about:newtab" aria-label="Refresh preview">↻</a>
+                                </div>
+                                <input class="address" value="about:newtab" aria-label="Preview address" />
+                            </div>
+                        </header>
+                        <div class="panel-body preview-frame">
+                            <div class="preview-window">
+                                <div class="window-top">
+                                    <div class="window-dots">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                    <span class="hint">Local preview surface</span>
+                                </div>
+                                <div class="window-content">
+                                    <div class="hero-card">
+                                        <strong>Offline build target</strong>
+                                        <div class="panel-copy">
+                                            Preview local AI interfaces, dashboards, and generated apps
+                                            without routing through a hosted sandbox.
+                                        </div>
+                                    </div>
+                                    <div class="metrics">
+                                        <div class="metric">
+                                            <strong>Model</strong>
+                                            <div class="panel-copy">Ollama / llama.cpp</div>
+                                        </div>
+                                        <div class="metric">
+                                            <strong>Transport</strong>
+                                            <div class="panel-copy">localhost / stdin</div>
+                                        </div>
+                                        <div class="metric">
+                                            <strong>Status</strong>
+                                            <div class="panel-copy">streaming</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <header class="panel-header">
+                            <span>Sandbox Remote Filesystem</span>
+                            <span class="muted">about:bookmarks + notes</span>
+                        </header>
+                        <div class="panel-body filesystem">
+                            <div class="tree">
+                                <div class="tree-item">
+                                    <strong>workspace</strong>
+                                    <small>local shell</small>
+                                </div>
+                                <div class="tree-item indent-1">
+                                    <strong>prompts</strong>
+                                    <small>saved tasks</small>
+                                </div>
+                                <div class="tree-item indent-1 active">
+                                    <strong>preview</strong>
+                                    <small>about:newtab</small>
+                                </div>
+                                <div class="tree-item indent-2">
+                                    <strong>index.html</strong>
+                                    <small>local target</small>
+                                </div>
+                                <div class="tree-item indent-1">
+                                    <strong>browser</strong>
+                                    <small>control pages</small>
+                                </div>
+                                <div class="tree-item indent-2">
+                                    <strong>settings</strong>
+                                    <small>about:settings</small>
+                                </div>
+                                <div class="tree-item indent-2">
+                                    <strong>processes</strong>
+                                    <small>about:processes</small>
+                                </div>
+                                <div class="tree-item indent-2">
+                                    <strong>notes</strong>
+                                    <small>about:notes</small>
+                                </div>
+                            </div>
+                            <div class="file-content">workspace/preview/index.html
+
+&lt;main class="app-shell"&gt;
+  &lt;h1&gt;Offline model dashboard&lt;/h1&gt;
+  &lt;p&gt;Stream tokens from a local runtime and render them here.&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Preview: about:newtab&lt;/li&gt;
+    &lt;li&gt;Settings: about:settings&lt;/li&gt;
+    &lt;li&gt;Processes: about:processes&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/main&gt;</div>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <header class="panel-header">
+                            <span>Sandbox Remote Output</span>
+                            <span class="muted">local build log</span>
+                        </header>
+                        <div class="panel-body">
+                            <div class="logs">
+                                <div class="log-line">[15:42:01] bootstrap workspace --target local-runtime
+workspace ready
+preview bound to about:newtab</div>
+                                <div class="log-line">[15:42:04] inspect browser --surface about:processes
+process monitor reachable
+settings surface reachable</div>
+                                <div class="log-line">[15:42:08] stream model --provider offline
+waiting for tokens from localhost
+render pipeline idle</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>
