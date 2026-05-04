@@ -6,49 +6,36 @@
         <title>Chat</title>
         <style>
             :root {
-                color-scheme: dark light;
-                --bg: #0a0f18;
-                --panel: #0f1724;
-                --panel-soft: #121c2b;
-                --panel-header: #101826;
-                --border: rgba(148, 163, 184, 0.16);
-                --text: #e5edf7;
-                --muted: #90a0b7;
-                --subtle: #62738c;
-                --accent: #4f8cff;
-                --accent-soft: rgba(79, 140, 255, 0.12);
+                --bg: #111111;
+                --panel: #161616;
+                --panel-soft: #1c1c1c;
+                --border: #2a2a2a;
+                --text: #f1f1f1;
+                --muted: #a3a3a3;
+                --accent: #d4d4d4;
                 --accent-strong: #ffffff;
-                --user: #122033;
-                --assistant: #0f1724;
+                --user: #202020;
+                --assistant: #151515;
                 --danger: #ff8b8b;
-                --success: #22c55e;
-                --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
             }
 
-            body[data-theme="dark"],
-            body.theme-dark {
+            body[data-theme="dark"] {
                 color-scheme: dark;
             }
 
-            body[data-theme="light"],
-            body.theme-light {
+            body[data-theme="light"] {
                 color-scheme: light;
-                --bg: #eef3f9;
+                --bg: #f5f5f5;
                 --panel: #ffffff;
-                --panel-soft: #f8fafc;
-                --panel-header: #f7f9fc;
-                --border: rgba(15, 23, 42, 0.1);
-                --text: #111827;
-                --muted: #526074;
-                --subtle: #718096;
-                --accent: #2563eb;
-                --accent-soft: rgba(37, 99, 235, 0.09);
+                --panel-soft: #f2f2f2;
+                --border: #d8d8d8;
+                --text: #1b1b1b;
+                --muted: #676767;
+                --accent: #3a3a3a;
                 --accent-strong: #000000;
-                --user: #edf3fb;
+                --user: #ececec;
                 --assistant: #ffffff;
                 --danger: #c63838;
-                --success: #16a34a;
-                --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
             }
 
             * {
@@ -57,17 +44,13 @@
 
             html,
             body {
-                height: 100%;
                 min-height: 100%;
             }
 
             body {
                 margin: 0;
-                overflow: hidden;
+                background: var(--bg);
                 color: var(--text);
-                background:
-                    radial-gradient(circle at top left, rgba(79, 140, 255, 0.12), transparent 28%),
-                    var(--bg);
                 font:
                     15px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
                     "Segoe UI", sans-serif;
@@ -80,238 +63,23 @@
             }
 
             .app {
-                position: relative;
-                height: 100vh;
                 min-height: 100vh;
-            }
-
-            .drawer {
-                position: fixed;
-                top: 14px;
-                left: 14px;
-                bottom: 14px;
-                z-index: 18;
-                width: 280px;
-                border: 1px solid var(--border);
-                background: var(--panel);
-                box-shadow: var(--shadow);
-                overflow: hidden;
-                transition: width 180ms ease;
-            }
-
-            .drawer[data-collapsed="true"] {
-                width: 54px;
-            }
-
-            .drawer-inner {
-                height: 100%;
-                min-height: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px;
-            }
-
-            .drawer-top {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
-            }
-
-            .drawer-title {
-                min-width: 0;
-            }
-
-            .drawer-title strong {
-                display: block;
-                font-size: 0.94rem;
-            }
-
-            .drawer-title span,
-            .drawer-section-title,
-            .drawer-skill-copy,
-            .queue-card-meta,
-            .header-notice-copy {
-                color: var(--muted);
-            }
-
-            .drawer-title span {
-                display: block;
-                font-size: 0.84rem;
-            }
-
-            .drawer-toggle,
-            .drawer-skill,
-            .header-notice-button,
-            .model-add-button,
-            .model-pill,
-            .topbar-link {
-                border: 1px solid var(--border);
-                background: var(--panel-soft);
-                color: var(--text);
-                cursor: pointer;
-            }
-
-            .drawer-toggle {
-                min-width: 38px;
-                min-height: 38px;
-                padding: 0 12px;
-            }
-
-            .drawer-sections {
-                flex: 1;
-                min-height: 0;
-                overflow-x: hidden;
-                overflow-y: auto;
-                display: grid;
-                gap: 14px;
-                padding-right: 2px;
-            }
-
-            .drawer-section {
-                display: grid;
-                gap: 10px;
-            }
-
-            .drawer-section-title {
-                font-size: 0.78rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-            }
-
-            .drawer-skill-list {
-                display: grid;
-                gap: 8px;
-            }
-
-            .drawer-skill {
-                width: 100%;
-                padding: 10px 12px;
-                text-align: left;
-            }
-
-            .drawer-skill.active {
-                border-color: rgba(79, 140, 255, 0.4);
-                background: var(--accent-soft);
-            }
-
-            .drawer-skill-title {
-                display: block;
-                margin-bottom: 4px;
-                font-size: 0.92rem;
-                font-weight: 600;
-            }
-
-            .drawer-skill-copy {
-                display: block;
-                font-size: 0.82rem;
-                line-height: 1.45;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-title,
-            .drawer[data-collapsed="true"] .drawer-section-title,
-            .drawer[data-collapsed="true"] .drawer-skill-copy,
-            .drawer[data-collapsed="true"] .drawer-skill-title {
-                display: none;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-skill {
-                min-height: 42px;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-skill::before {
-                content: attr(data-short);
-                font-size: 0.82rem;
-                font-weight: 700;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-sections {
-                display: none;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-inner {
-                align-items: center;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-top {
-                justify-content: center;
-            }
-
-            .drawer[data-collapsed="true"] .drawer-toggle {
-                min-width: 40px;
-                padding: 0;
-            }
-
-            .model-library {
-                display: grid;
-                gap: 10px;
-            }
-
-            .model-presets,
-            .model-pills {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .model-pill,
-            .model-add-button {
-                min-height: 32px;
-                padding: 0 10px;
-                font-size: 0.84rem;
-            }
-
-            .model-pill.active {
-                border-color: rgba(79, 140, 255, 0.4);
-                background: var(--accent-soft);
-                color: var(--accent-strong);
-            }
-
-            .model-add-row {
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) auto;
-                gap: 8px;
-            }
-
-            .model-add-input {
-                min-width: 0;
-                min-height: 32px;
-                padding: 0 10px;
-                border: 1px solid var(--border);
-                background: var(--panel-soft);
-                color: var(--text);
-            }
-
-            .drawer[data-collapsed="true"] .model-library {
-                display: none;
             }
 
             .topbar {
                 position: fixed;
                 top: 14px;
-                left: 308px;
-                right: 14px;
+                left: 50%;
+                transform: translateX(-50%);
                 z-index: 20;
-                width: auto;
-                max-width: 980px;
+                width: min(880px, calc(100vw - 28px));
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 16px;
                 padding: 14px 20px;
                 border: 1px solid var(--border);
-                background: var(--panel);
-                box-shadow: var(--shadow);
-            }
-
-            body[data-drawer-collapsed="true"] .topbar {
-                left: 92px;
+                background: rgba(22, 22, 22, 0.94);
             }
 
             .title {
@@ -322,17 +90,17 @@
             }
 
             .title-mark {
-                width: 12px;
-                height: 12px;
-                border-radius: 3px;
-                background: linear-gradient(135deg, var(--accent), #7c3aed);
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: var(--accent-strong);
                 flex: 0 0 auto;
             }
 
             .title-copy strong {
                 display: block;
-                font-size: 1rem;
-                font-weight: 700;
+                font-size: 0.98rem;
+                font-weight: 600;
             }
 
             .title-copy span,
@@ -358,19 +126,10 @@
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                flex-wrap: wrap;
-                justify-content: flex-end;
-            }
-
-            .topbar-nav {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                flex-wrap: wrap;
             }
 
             .header-button {
-                min-height: 34px;
+                min-height: 32px;
                 padding: 0 12px;
                 border: 1px solid var(--border);
                 background: var(--panel-soft);
@@ -378,118 +137,17 @@
                 cursor: pointer;
             }
 
-            .topbar-link {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 34px;
-                padding: 0 12px;
-                font-size: 0.9rem;
-                color: var(--muted);
-            }
-
-            .topbar-link:hover {
-                color: var(--text);
-                border-color: rgba(79, 140, 255, 0.28);
-            }
-
-            .queue-stack {
-                position: fixed;
-                top: 92px;
-                right: 14px;
-                z-index: 19;
-                width: min(280px, calc(100vw - 28px));
-                display: grid;
-                gap: 8px;
-            }
-
-            .queue-stack[hidden] {
-                display: none;
-            }
-
-            .queue-card {
-                border: 1px solid var(--border);
-                background: var(--panel);
-                padding: 10px 12px;
-                box-shadow: var(--shadow);
-            }
-
-            .queue-card-top {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
-                margin-bottom: 4px;
-            }
-
-            .queue-card-title {
-                font-size: 0.9rem;
-                font-weight: 600;
-            }
-
-            .queue-card-status {
-                font-size: 0.78rem;
-                color: var(--muted);
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-            }
-
-            .header-notice {
-                position: fixed;
-                top: 74px;
-                right: 14px;
-                z-index: 22;
-                width: min(360px, calc(100vw - 28px));
-                border: 1px solid var(--border);
-                background: var(--panel);
-                box-shadow: var(--shadow);
-                padding: 12px 14px;
-            }
-
-            .header-notice[hidden] {
-                display: none;
-            }
-
-            .header-notice-title {
-                margin: 0 0 6px;
-                font-size: 0.94rem;
-                font-weight: 600;
-            }
-
-            .header-notice-copy {
-                margin: 0 0 12px;
-                font-size: 0.86rem;
-                line-height: 1.5;
-            }
-
-            .header-notice-actions {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-
             .thread {
-                height: 100vh;
-                overflow-x: hidden;
-                overflow-y: auto;
-                overscroll-behavior: contain;
-                padding: 104px 20px 210px 308px;
+                min-height: 100vh;
+                overflow: auto;
+                padding: 104px 20px 210px;
             }
 
             .thread-inner {
-                width: min(880px, calc(100vw - 360px));
-                max-width: 100%;
-                margin: 0 auto 0 0;
+                width: min(880px, 100%);
+                margin: 0 auto;
                 display: grid;
                 gap: 24px;
-            }
-
-            body[data-drawer-collapsed="true"] .thread {
-                padding-left: 92px;
-            }
-
-            body[data-drawer-collapsed="true"] .thread-inner {
-                width: min(920px, calc(100vw - 144px));
             }
 
             .message {
@@ -567,7 +225,7 @@
 
             .assistant-section {
                 border: 1px solid var(--border);
-                background: var(--panel-soft);
+                background: #191919;
             }
 
             body[data-theme="light"] .assistant-section,
@@ -575,7 +233,7 @@
             body[data-theme="light"] .assistant-chip,
             body[data-theme="light"] .assistant-callout,
             body[data-theme="light"] .assistant-plan {
-                background: var(--panel-soft);
+                background: #f4f4f4;
             }
 
             .assistant-section summary {
@@ -623,7 +281,7 @@
             .assistant-callout,
             .assistant-plan {
                 border: 1px solid var(--border);
-                background: var(--panel-soft);
+                background: #191919;
             }
 
             .assistant-row {
@@ -765,17 +423,17 @@
 
             .plan-popup {
                 position: fixed;
-                left: 308px;
+                left: max(18px, calc(50% - 440px));
                 bottom: 132px;
                 z-index: 24;
                 width: min(420px, calc(100vw - 36px));
                 border: 1px solid var(--border);
-                background: var(--panel);
-                box-shadow: var(--shadow);
+                background: rgba(24, 24, 24, 0.98);
+                box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
             }
 
-            body[data-drawer-collapsed="true"] .plan-popup {
-                left: 92px;
+            body[data-theme="light"] .plan-popup {
+                background: rgba(255, 255, 255, 0.98);
             }
 
             .plan-popup[hidden] {
@@ -875,16 +533,11 @@
 
             .composer-wrap {
                 position: fixed;
-                left: 308px;
+                left: 50%;
                 bottom: 14px;
-                right: 14px;
+                transform: translateX(-50%);
                 z-index: 20;
-                width: auto;
-                max-width: 980px;
-            }
-
-            body[data-drawer-collapsed="true"] .composer-wrap {
-                left: 92px;
+                width: min(880px, calc(100vw - 28px));
             }
 
             .composer {
@@ -913,8 +566,8 @@
             }
 
             .control-button.active {
-                border-color: rgba(79, 140, 255, 0.4);
-                background: var(--accent-soft);
+                border-color: #4a4a4a;
+                background: #262626;
                 color: var(--accent-strong);
             }
 
@@ -924,18 +577,15 @@
 
             .control-submit {
                 cursor: pointer;
-                background: linear-gradient(135deg, var(--accent), #7c3aed);
-                color: #fff;
-                border-color: transparent;
+                background: #232323;
                 font-weight: 600;
             }
 
             .input-shell {
                 border: 1px solid var(--border);
-                background: var(--panel);
+                background: rgba(28, 28, 28, 0.96);
                 border-radius: 14px;
                 padding: 10px;
-                box-shadow: var(--shadow);
             }
 
             #composer-input {
@@ -965,13 +615,6 @@
                 font-size: 0.88rem;
             }
 
-            .composer-actions {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-left: auto;
-            }
-
             .status.error {
                 color: var(--danger);
             }
@@ -982,19 +625,6 @@
             }
 
             @media (max-width: 720px) {
-                .drawer {
-                    top: 10px;
-                    left: 10px;
-                    bottom: auto;
-                    width: 54px;
-                    height: auto;
-                }
-
-                .drawer[data-collapsed="false"] {
-                    width: min(260px, calc(100vw - 20px));
-                    max-height: calc(100vh - 20px);
-                }
-
                 .topbar,
                 .thread,
                 .composer-wrap {
@@ -1004,52 +634,22 @@
 
                 .topbar {
                     top: 10px;
-                    width: calc(100vw - 84px);
-                    max-width: none;
-                    left: auto;
-                    right: 10px;
+                    width: calc(100vw - 20px);
                 }
 
                 .composer-wrap {
                     bottom: 10px;
-                    left: 10px;
-                    right: 10px;
                     width: calc(100vw - 20px);
-                    max-width: none;
-                }
-
-                .queue-stack {
-                    top: 84px;
-                    right: 10px;
-                    width: calc(100vw - 20px);
-                }
-
-                .header-notice {
-                    top: 78px;
-                    left: 10px;
-                    right: 10px;
-                    width: auto;
                 }
 
                 .thread {
                     padding-top: 98px;
                     padding-bottom: 230px;
-                    padding-left: 14px;
-                }
-
-                .thread-inner,
-                body[data-drawer-collapsed="true"] .thread-inner {
-                    width: 100%;
-                    min-width: 0;
                 }
 
                 .composer-footer {
                     align-items: flex-start;
                     flex-direction: column;
-                }
-
-                .composer-actions {
-                    margin-left: 0;
                 }
 
                 .plan-popup {
@@ -1062,92 +662,19 @@
     </head>
     <body>
         <main class="app">
-            <aside id="left-drawer" class="drawer" data-collapsed="false">
-                <div class="drawer-inner">
-                    <div class="drawer-top">
-                        <div class="drawer-title">
-                            <strong>Workspace</strong>
-                            <span>Skills and helpers</span>
-                        </div>
-                        <button type="button" id="drawer-toggle" class="drawer-toggle" aria-label="Toggle drawer">◀</button>
-                    </div>
-
-                    <div class="drawer-sections">
-                        <section class="drawer-section">
-                            <div class="drawer-section-title">Skills</div>
-                            <div id="drawer-skills" class="drawer-skill-list"></div>
-                        </section>
-
-                        <section class="drawer-section">
-                            <div class="drawer-section-title">Shortcuts</div>
-                            <div class="drawer-skill-list">
-                                <button type="button" class="drawer-skill" data-short="CF" data-prefill="Use the current file as context and explain the next change.">
-                                    <span class="drawer-skill-title">Current file</span>
-                                    <span class="drawer-skill-copy">Seed the prompt with the active file workflow.</span>
-                                </button>
-                                <button type="button" class="drawer-skill" data-short="TR" data-prefill="Trace the request through the relevant files and summarize the path first.">
-                                    <span class="drawer-skill-title">Trace</span>
-                                    <span class="drawer-skill-copy">Ask for a quick path through the code or task.</span>
-                                </button>
-                                <button type="button" class="drawer-skill" data-short="TS" data-prefill="List the tests or checks that should pass after the change.">
-                                    <span class="drawer-skill-title">Checks</span>
-                                    <span class="drawer-skill-copy">Add test and verification framing to the draft.</span>
-                                </button>
-                            </div>
-                        </section>
-
-                        <section class="drawer-section">
-                            <div class="drawer-section-title">Offline models</div>
-                            <div class="model-library">
-                                <div id="model-presets" class="model-presets"></div>
-                                <div class="model-add-row">
-                                    <input
-                                        id="model-add-input"
-                                        class="model-add-input"
-                                        type="text"
-                                        placeholder="add local model"
-                                        aria-label="Add local model"
-                                    />
-                                    <button type="button" id="model-add-button" class="model-add-button">Add</button>
-                                </div>
-                                <div id="model-pills" class="model-pills"></div>
-                            </div>
-                        </section>
-                    </div>
-                </div>
-            </aside>
-
             <header class="topbar">
                 <div class="title">
                     <span class="title-mark" aria-hidden="true"></span>
                     <div class="title-copy">
-                        <strong>Ladybird Chat</strong>
-                        <span>Independent browser workspace</span>
+                        <strong>Chat</strong>
+                        <span>Plain full-page workspace</span>
                     </div>
                 </div>
                 <div class="topbar-actions">
-                    <nav class="topbar-nav" aria-label="Workspace links">
-                        <a class="topbar-link" href="about:about">Build</a>
-                        <a class="topbar-link" href="about:notes">Notes</a>
-                    </nav>
                     <button type="button" id="theme-toggle" class="header-button">Light</button>
                     <div id="status-line" class="status">Ready.</div>
                 </div>
             </header>
-
-            <aside id="header-notice" class="header-notice" hidden>
-                <div class="header-notice-title">Workspace access request</div>
-                <p id="header-notice-copy" class="header-notice-copy">
-                    Confirm whether this session can use workspace context for the next queued action.
-                </p>
-                <div class="header-notice-actions">
-                    <button type="button" id="notice-confirm" class="header-notice-button">Confirm</button>
-                    <button type="button" id="notice-allow" class="header-notice-button">Allow</button>
-                    <button type="button" id="notice-deny" class="header-notice-button">Deny</button>
-                </div>
-            </aside>
-
-            <section id="queue-stack" class="queue-stack" hidden></section>
 
             <section class="thread" id="thread">
                 <div class="thread-inner" id="thread-inner"></div>
@@ -1179,8 +706,6 @@
                                 <option value="gpt-5-mini">model: gpt-5-mini</option>
                                 <option value="claude-sonnet">model: claude-sonnet</option>
                                 <option value="local">model: local</option>
-                                <option value="ollama">model: ollama</option>
-                                <option value="lm-studio">model: lm-studio</option>
                             </select>
 
                             <select id="effort-select" class="control control-select" aria-label="Medium">
@@ -1191,6 +716,7 @@
 
                             <button type="button" id="web-toggle" class="control control-button">off</button>
 
+                            <button type="button" id="submit-button" class="control-submit">submit</button>
                         </div>
 
                         <textarea
@@ -1202,10 +728,7 @@
 
                         <div class="composer-footer">
                             <div class="control-note">Enter submits. Shift+Enter adds a new line. Messages stay saved locally.</div>
-                            <div class="composer-actions">
-                                <div id="meta-line" class="meta">target current file · agent ask · model gpt-5.4 · medium · off</div>
-                                <button type="button" id="submit-button" class="control-submit">submit</button>
-                            </div>
+                            <div id="meta-line" class="meta">target current file · agent ask · model gpt-5.4 · medium · off</div>
                         </div>
                     </div>
                 </div>
@@ -1240,42 +763,6 @@
             (function () {
                 var STORAGE_KEY = "ladybird-newtab-chat-v1";
                 var MAX_MESSAGES = 80;
-                var DEFAULT_MODELS = ["gpt-5.4", "gpt-5-mini", "claude-sonnet", "local", "ollama", "lm-studio"];
-                var MODEL_PRESETS = ["llama3.2", "qwen2.5-coder", "deepseek-r1", "mistral-nemo"];
-                var SKILLS = [
-                    {
-                        id: "plan",
-                        short: "PL",
-                        title: "Plan",
-                        copy: "Turn the draft into steps, tradeoffs, and a likely path.",
-                        prompt: "Create a compact plan with clear steps, risks, and likely completion points.",
-                        agent: "plan",
-                    },
-                    {
-                        id: "refactor",
-                        short: "RF",
-                        title: "Refactor",
-                        copy: "Aim the prompt at cleanup, reshaping, and safer structure.",
-                        prompt: "Refactor this cleanly and preserve behavior while improving the structure.",
-                        agent: "edit",
-                    },
-                    {
-                        id: "agent",
-                        short: "AG",
-                        title: "Agent",
-                        copy: "Bias the next response toward active execution and tool use.",
-                        prompt: "Work like an active coding agent and describe the next concrete actions.",
-                        agent: "code",
-                    },
-                    {
-                        id: "local",
-                        short: "LM",
-                        title: "Local model",
-                        copy: "Frame the request for offline or local-model-friendly handling.",
-                        prompt: "Assume the workflow should stay local and offline friendly where possible.",
-                        model: "local",
-                    },
-                ];
 
                 var threadInner = document.getElementById("thread-inner");
                 var emptyState = document.getElementById("empty-state");
@@ -1300,19 +787,6 @@
                 var planRefactorButton = document.getElementById("plan-refactor");
                 var planSteerButton = document.getElementById("plan-steer");
                 var planPopupClose = document.getElementById("plan-popup-close");
-                var drawer = document.getElementById("left-drawer");
-                var drawerToggle = document.getElementById("drawer-toggle");
-                var drawerSkills = document.getElementById("drawer-skills");
-                var queueStack = document.getElementById("queue-stack");
-                var notice = document.getElementById("header-notice");
-                var noticeCopy = document.getElementById("header-notice-copy");
-                var noticeConfirm = document.getElementById("notice-confirm");
-                var noticeAllow = document.getElementById("notice-allow");
-                var noticeDeny = document.getElementById("notice-deny");
-                var modelPresets = document.getElementById("model-presets");
-                var modelPills = document.getElementById("model-pills");
-                var modelAddInput = document.getElementById("model-add-input");
-                var modelAddButton = document.getElementById("model-add-button");
 
                 function normalizeState(raw) {
                     var fallback = defaultState();
@@ -1329,26 +803,6 @@
                                       items: Array.isArray(raw.planPopup.items) ? raw.planPopup.items : [],
                                   }
                                 : { open: false, trajectory: "direct", items: [] },
-                        drawer:
-                            raw.drawer && typeof raw.drawer === "object"
-                                ? { collapsed: !!raw.drawer.collapsed, selectedSkill: raw.drawer.selectedSkill || "plan" }
-                                : { collapsed: false, selectedSkill: "plan" },
-                        queue: Array.isArray(raw.queue) ? raw.queue : [],
-                        notice:
-                            raw.notice && typeof raw.notice === "object"
-                                ? {
-                                      open: !!raw.notice.open,
-                                      status: raw.notice.status || "pending",
-                                      message:
-                                          raw.notice.message ||
-                                          "Confirm whether this session can use workspace context for the next queued action.",
-                                  }
-                                : {
-                                      open: false,
-                                      status: "pending",
-                                       message: "Confirm whether this session can use workspace context for the next queued action.",
-                                   },
-                        models: Array.isArray(raw.models) ? raw.models : [],
                     };
                 }
 
@@ -1420,10 +874,6 @@
                                 messages: state.messages,
                                 settings: state.settings,
                                 planPopup: state.planPopup,
-                                drawer: state.drawer,
-                                queue: state.queue,
-                                notice: state.notice,
-                                models: state.models,
                             })
                         );
                     } catch (e) {}
@@ -1462,17 +912,6 @@
                             trajectory: "direct",
                             items: [],
                         },
-                        drawer: {
-                            collapsed: false,
-                            selectedSkill: "plan",
-                        },
-                        queue: [],
-                        notice: {
-                            open: true,
-                            status: "pending",
-                            message: "Confirm whether this session can use workspace context for the next queued action.",
-                        },
-                        models: [],
                     };
                 }
 
@@ -1481,85 +920,10 @@
 
                 function applyTheme() {
                     document.body.setAttribute("data-theme", theme);
-                    document.body.className = theme === "dark" ? "theme-dark" : "theme-light";
                     if (themeToggle) themeToggle.textContent = theme === "dark" ? "Light" : "Dark";
                 }
 
-                function allModels() {
-                    var seen = {};
-                    var out = [];
-                    var items = DEFAULT_MODELS.concat(state.models || []);
-                    for (var i = 0; i < items.length; i++) {
-                        var model = String(items[i] || "").trim();
-                        if (!model || seen[model]) continue;
-                        seen[model] = true;
-                        out.push(model);
-                    }
-                    return out;
-                }
-
-                function renderModelOptions() {
-                    if (!modelSelect) return;
-
-                    var models = allModels();
-                    modelSelect.textContent = "";
-                    for (var i = 0; i < models.length; i++) {
-                        var option = document.createElement("option");
-                        option.value = models[i];
-                        option.textContent = "model: " + models[i];
-                        modelSelect.appendChild(option);
-                    }
-
-                    if (models.indexOf(state.settings.model) === -1) {
-                        state.settings.model = models[0] || "gpt-5.4";
-                    }
-                    modelSelect.value = state.settings.model;
-                }
-
-                function renderModelLibrary() {
-                    if (!modelPresets || !modelPills) return;
-
-                    modelPresets.textContent = "";
-                    modelPills.textContent = "";
-
-                    for (var i = 0; i < MODEL_PRESETS.length; i++) {
-                        var preset = document.createElement("button");
-                        preset.type = "button";
-                        preset.className = "model-pill" + (state.settings.model === MODEL_PRESETS[i] ? " active" : "");
-                        preset.setAttribute("data-model", MODEL_PRESETS[i]);
-                        preset.textContent = MODEL_PRESETS[i];
-                        modelPresets.appendChild(preset);
-                    }
-
-                    var custom = state.models || [];
-                    for (var j = 0; j < custom.length; j++) {
-                        var pill = document.createElement("button");
-                        pill.type = "button";
-                        pill.className = "model-pill" + (state.settings.model === custom[j] ? " active" : "");
-                        pill.setAttribute("data-model", custom[j]);
-                        pill.textContent = custom[j];
-                        modelPills.appendChild(pill);
-                    }
-                }
-
-                function addOfflineModel(name) {
-                    var model = String(name || "").replace(/\s+/g, " ").trim();
-                    if (!model) return false;
-
-                    if (DEFAULT_MODELS.indexOf(model) === -1 && (state.models || []).indexOf(model) === -1) {
-                        state.models.push(model);
-                    }
-
-                    state.settings.model = model;
-                    renderModelOptions();
-                    renderModelLibrary();
-                    syncControlsFromState();
-                    saveState();
-                    return true;
-                }
-
                 function syncControlsFromState() {
-                    renderModelOptions();
                     targetSelect.value = state.settings.target;
                     agentSelect.value = state.settings.agent;
                     modelSelect.value = state.settings.model;
@@ -1577,7 +941,6 @@
                         state.settings.medium +
                         " · " +
                         (state.settings.web ? "on" : "off");
-                    renderModelLibrary();
                 }
 
                 function setStatus(text, isError) {
@@ -1726,137 +1089,6 @@
                     }
                 }
 
-                function queueStatusLabel(status) {
-                    if (status === "running") return "running";
-                    if (status === "done") return "done";
-                    return "queued";
-                }
-
-                function refreshQueueStates() {
-                    var queue = state.queue || [];
-                    for (var i = 0; i < queue.length; i++) {
-                        if (queue[i].status === "done") continue;
-                        queue[i].status = i === 0 ? "running" : "queued";
-                    }
-                }
-
-                function renderQueue() {
-                    if (!queueStack) return;
-
-                    refreshQueueStates();
-                    var queue = state.queue || [];
-                    queueStack.textContent = "";
-                    queueStack.hidden = queue.length === 0;
-
-                    for (var i = 0; i < queue.length && i < 4; i++) {
-                        var item = queue[i];
-                        var card = document.createElement("article");
-                        card.className = "queue-card";
-
-                        var top = document.createElement("div");
-                        top.className = "queue-card-top";
-                        top.innerHTML =
-                            '<div class="queue-card-title">' +
-                            escapeHtml(item.title || "Queued prompt") +
-                            '</div><div class="queue-card-status">' +
-                            escapeHtml(queueStatusLabel(item.status)) +
-                            "</div>";
-
-                        var meta = document.createElement("div");
-                        meta.className = "queue-card-meta";
-                        meta.textContent =
-                            "agent " +
-                            (item.agent || state.settings.agent) +
-                            " · model " +
-                            (item.model || state.settings.model);
-
-                        card.appendChild(top);
-                        card.appendChild(meta);
-                        queueStack.appendChild(card);
-                    }
-                }
-
-                function renderDrawer() {
-                    if (!drawer || !drawerSkills) return;
-
-                    drawer.setAttribute("data-collapsed", state.drawer.collapsed ? "true" : "false");
-                    document.body.setAttribute("data-drawer-collapsed", state.drawer.collapsed ? "true" : "false");
-                    if (drawerToggle) drawerToggle.textContent = state.drawer.collapsed ? "+" : "−";
-                    drawerSkills.textContent = "";
-
-                    for (var i = 0; i < SKILLS.length; i++) {
-                        var skill = SKILLS[i];
-                        var button = document.createElement("button");
-                        button.type = "button";
-                        button.className = "drawer-skill" + (state.drawer.selectedSkill === skill.id ? " active" : "");
-                        button.setAttribute("data-skill", skill.id);
-                        button.setAttribute("data-short", skill.short);
-                        button.innerHTML =
-                            '<span class="drawer-skill-title">' +
-                            escapeHtml(skill.title) +
-                            '</span><span class="drawer-skill-copy">' +
-                            escapeHtml(skill.copy) +
-                            "</span>";
-                        drawerSkills.appendChild(button);
-                    }
-                }
-
-                function renderNotice() {
-                    if (!notice || !noticeCopy) return;
-
-                    notice.hidden = !state.notice.open;
-                    noticeCopy.textContent = state.notice.message;
-
-                    if (noticeConfirm) noticeConfirm.disabled = state.notice.status === "confirmed";
-                    if (noticeAllow) noticeAllow.disabled = state.notice.status === "allowed";
-                    if (noticeDeny) noticeDeny.disabled = state.notice.status === "denied";
-                }
-
-                function setNotice(status, open) {
-                    state.notice.status = status;
-                    state.notice.open = open;
-                    saveState();
-                    renderNotice();
-                }
-
-                function applySkill(skillId) {
-                    var skill = null;
-                    for (var i = 0; i < SKILLS.length; i++) {
-                        if (SKILLS[i].id === skillId) {
-                            skill = SKILLS[i];
-                            break;
-                        }
-                    }
-
-                    if (!skill) return;
-
-                    state.drawer.selectedSkill = skill.id;
-                    if (skill.agent) state.settings.agent = skill.agent;
-                    if (skill.model) addOfflineModel(skill.model);
-
-                    var prefix = skill.prompt + "\n";
-                    if (!input.value) input.value = prefix;
-                    else if (input.value.indexOf(skill.prompt) !== 0) input.value = prefix + input.value;
-
-                    saveState();
-                    syncControlsFromState();
-                    renderDrawer();
-                    input.focus();
-                    setStatus("Loaded " + skill.title.toLowerCase() + " skill.");
-                }
-
-                function enqueuePrompt(prompt) {
-                    state.queue.push({
-                        id: String(new Date().getTime()) + "-" + String(state.queue.length + 1),
-                        title: summarizePrompt(prompt),
-                        prompt: prompt,
-                        agent: state.settings.agent,
-                        model: state.settings.model,
-                        status: "queued",
-                    });
-                    refreshQueueStates();
-                }
-
                 function renderSection(title, meta, contentHtml, open) {
                     return (
                         '<details class="assistant-section"' +
@@ -2000,7 +1232,6 @@
                     }
 
                     emptyState.hidden = state.messages.length > 0;
-                    renderQueue();
                     window.setTimeout(function () {
                         thread.scrollTop = thread.scrollHeight;
                     }, 0);
@@ -2013,28 +1244,10 @@
                         return;
                     }
 
-                    if (
-                        state.notice.status === "denied" &&
-                        (state.settings.target === "workspace" || state.settings.target === "browser")
-                    ) {
-                        setStatus("Workspace access is denied in the header notice.", true);
-                        state.notice.open = true;
-                        saveState();
-                        renderNotice();
-                        return;
-                    }
-
-                    enqueuePrompt(prompt);
-
                     state.messages.push({ role: "user", content: prompt });
                     var response = buildAssistantReply(prompt);
                     state.messages.push({ role: "assistant", response: response });
                     setCurrentPlanFromResponse(response);
-
-                    if (state.queue.length) {
-                        state.queue[0].status = "done";
-                        if (state.queue.length > 4) state.queue = state.queue.slice(state.queue.length - 4);
-                    }
 
                     if (state.messages.length > MAX_MESSAGES) {
                         state.messages = state.messages.slice(state.messages.length - MAX_MESSAGES);
@@ -2042,7 +1255,6 @@
 
                     saveState();
                     renderMessages();
-                    renderNotice();
                     input.value = "";
                     setStatus("Sent.");
                     input.focus();
@@ -2057,78 +1269,10 @@
                     setStatus("Added a context block.");
                 });
 
-                if (drawerToggle) {
-                    drawerToggle.addEventListener("click", function () {
-                        state.drawer.collapsed = !state.drawer.collapsed;
-                        saveState();
-                        renderDrawer();
-                    });
-                }
-
-                if (drawerSkills) {
-                    drawerSkills.addEventListener("click", function (event) {
-                        var target = event.target;
-                        while (target && target !== drawerSkills && !target.getAttribute("data-skill")) target = target.parentNode;
-                        if (!target || target === drawerSkills) return;
-                        applySkill(target.getAttribute("data-skill"));
-                    });
-                }
-
-                if (drawer) {
-                    drawer.addEventListener("click", function (event) {
-                        var target = event.target;
-                        while (target && target !== drawer && !target.getAttribute("data-prefill")) target = target.parentNode;
-                        if (!target || target === drawer) return;
-                        var prefill = target.getAttribute("data-prefill");
-                        if (!prefill) return;
-                        input.value = input.value ? prefill + "\n" + input.value : prefill + "\n";
-                        input.focus();
-                        setStatus("Added helper prompt.");
-                    });
-                }
-
-                function handleModelButtonClick(event) {
-                    var target = event.target;
-                    while (target && target !== this && !target.getAttribute("data-model")) target = target.parentNode;
-                    if (!target || target === this) return;
-                    if (addOfflineModel(target.getAttribute("data-model"))) {
-                        setStatus("Selected offline model.");
-                    }
-                }
-
-                if (modelPresets) modelPresets.addEventListener("click", handleModelButtonClick);
-                if (modelPills) modelPills.addEventListener("click", handleModelButtonClick);
-
-                if (modelAddButton) {
-                    modelAddButton.addEventListener("click", function () {
-                        if (!modelAddInput) return;
-                        if (!addOfflineModel(modelAddInput.value)) {
-                            setStatus("Enter a local model name first.", true);
-                            return;
-                        }
-                        modelAddInput.value = "";
-                        setStatus("Added offline model.");
-                    });
-                }
-
-                if (modelAddInput) {
-                    modelAddInput.addEventListener("keydown", function (event) {
-                        if (event.key === "Enter") {
-                            event.preventDefault();
-                            if (modelAddButton) modelAddButton.click();
-                        }
-                    });
-                }
-
                 targetSelect.addEventListener("change", function () {
                     state.settings.target = targetSelect.value;
-                    if (targetSelect.value === "workspace" || targetSelect.value === "browser") {
-                        state.notice.open = state.notice.status !== "allowed" && state.notice.status !== "confirmed";
-                        state.notice.message = "Confirm whether this session can use " + targetSelect.value + " context for the next queued action.";
-                    }
                     saveState();
                     syncControlsFromState();
-                    renderNotice();
                 });
 
                 agentSelect.addEventListener("change", function () {
@@ -2138,7 +1282,7 @@
                 });
 
                 modelSelect.addEventListener("change", function () {
-                    addOfflineModel(modelSelect.value);
+                    state.settings.model = modelSelect.value;
                     saveState();
                     syncControlsFromState();
                 });
@@ -2176,27 +1320,6 @@
                         theme = theme === "dark" ? "light" : "dark";
                         localStorage.setItem(THEME_KEY, theme);
                         applyTheme();
-                    });
-                }
-
-                if (noticeConfirm) {
-                    noticeConfirm.addEventListener("click", function () {
-                        setNotice("confirmed", false);
-                        setStatus("Workspace access confirmed.");
-                    });
-                }
-
-                if (noticeAllow) {
-                    noticeAllow.addEventListener("click", function () {
-                        setNotice("allowed", false);
-                        setStatus("Workspace access allowed.");
-                    });
-                }
-
-                if (noticeDeny) {
-                    noticeDeny.addEventListener("click", function () {
-                        setNotice("denied", true);
-                        setStatus("Workspace access denied.", true);
                     });
                 }
 
@@ -2263,9 +1386,6 @@
                 syncControlsFromState();
                 renderMessages();
                 renderPlanPopup();
-                renderDrawer();
-                renderQueue();
-                renderNotice();
                 input.focus();
             })();
         </script>
